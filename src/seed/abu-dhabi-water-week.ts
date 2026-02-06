@@ -185,9 +185,12 @@ export default async function seedAbuDhabiWaterWeek({ strapi }: { strapi: Core.S
     }
 
     // Seed Abu Dhabi Water Week Page (Single Type)
-    const existingPage = await strapi.entityService.findMany('api::abu-dhabi-water-week.abu-dhabi-water-week');
+    // For single types, findMany returns an object or null, not an array
+    const existingPage = await strapi.entityService.findMany('api::abu-dhabi-water-week.abu-dhabi-water-week') as { id?: string | number } | null;
     
-    if (!existingPage || (Array.isArray(existingPage) && existingPage.length === 0) || !existingPage.id) {
+    const pageExists = existingPage && typeof existingPage === 'object' && 'id' in existingPage;
+    
+    if (!pageExists) {
       console.log('📝 Seeding Abu Dhabi Water Week Page...');
       
       await strapi.entityService.create('api::abu-dhabi-water-week.abu-dhabi-water-week', {
