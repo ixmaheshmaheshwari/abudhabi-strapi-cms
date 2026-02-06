@@ -1,0 +1,119 @@
+{
+  "kind": "singleType",
+  "collectionName": "abu_dhabi_water_weeks",
+  "info": {
+    "singularName": "abu-dhabi-water-week",
+    "pluralName": "abu-dhabi-water-weeks",
+    "displayName": "Abu Dhabi Water Week Page",
+    "description": "Content for the Abu Dhabi Water Week page"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "hero_title_en": {
+      "type": "string",
+      "required": true,
+      "default": "About Abu Dhabi"
+    },
+    "hero_title_secondary_en": {
+      "type": "string",
+      "default": "Water & Power Week."
+    },
+    "hero_title_ar": {
+      "type": "string"
+    },
+    "hero_title_secondary_ar": {
+      "type": "string"
+    },
+    "hero_description_en": {
+      "type": "text"
+    },
+    "hero_description_ar": {
+      "type": "text"
+    },
+    "hero_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "explore_heading_en": {
+      "type": "string",
+      "default": "Why be part of Abu Dhabi Water & Power Week?"
+    },
+    "explore_heading_ar": {
+      "type": "string"
+    },
+    "explore_para1_en": {
+      "type": "richtext"
+    },
+    "explore_para1_ar": {
+      "type": "richtext"
+    },
+    "explore_para2_en": {
+      "type": "text"
+    },
+    "explore_para2_ar": {
+      "type": "text"
+    },
+    "explore_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "top_reasons_title_en": {
+      "type": "string",
+      "default": "Top Reasons to Visit ADWPW"
+    },
+    "top_reasons_title_ar": {
+      "type": "string"
+    },
+    "why_exhibitor_heading_en": {
+      "type": "richtext"
+    },
+    "why_exhibitor_heading_ar": {
+      "type": "richtext"
+    },
+    "why_exhibitor_para1_en": {
+      "type": "richtext"
+    },
+    "why_exhibitor_para1_ar": {
+      "type": "richtext"
+    },
+    "why_exhibitor_para2_en": {
+      "type": "text"
+    },
+    "why_exhibitor_para2_ar": {
+      "type": "text"
+    },
+    "why_exhibitor_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "participate_title_en": {
+      "type": "string",
+      "default": "Top Reasons to Participate as an Exhibitor"
+    },
+    "participate_title_ar": {
+      "type": "string"
+    },
+    "world_utilities_title_en": {
+      "type": "string",
+      "default": "World Utilities Congress"
+    },
+    "world_utilities_title_ar": {
+      "type": "string"
+    },
+    "world_utilities_description_en": {
+      "type": "text"
+    },
+    "world_utilities_description_ar": {
+      "type": "text"
+    }
+  }
+}

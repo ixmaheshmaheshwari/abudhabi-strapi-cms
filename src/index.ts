@@ -1,4 +1,4 @@
-// import type { Core } from '@strapi/strapi';
+import type { Core } from '@strapi/strapi';
 
 export default {
   /**
@@ -16,5 +16,13 @@ export default {
    * This gives you an opportunity to set up your data model,
    * run jobs, or perform some special logic.
    */
-  bootstrap(/* { strapi }: { strapi: Core.Strapi } */) {},
+  async bootstrap({ strapi }: { strapi: Core.Strapi }) {
+    // Seed Abu Dhabi Water Week content
+    try {
+      const seedAbuDhabiWaterWeek = require('./seed/abu-dhabi-water-week');
+      await seedAbuDhabiWaterWeek({ strapi });
+    } catch (error) {
+      console.error('Error seeding Abu Dhabi Water Week data:', error);
+    }
+  },
 };

@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "exhibitor_reasons",
+  "info": {
+    "singularName": "exhibitor-reason",
+    "pluralName": "exhibitor-reasons",
+    "displayName": "Exhibitor Reason",
+    "description": "Top reasons to participate as an exhibitor"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "order": {
+      "type": "integer",
+      "required": true
+    },
+    "title_en": {
+      "type": "string",
+      "required": true
+    },
+    "title_ar": {
+      "type": "string"
+    },
+    "description_en": {
+      "type": "text",
+      "required": true
+    },
+    "description_ar": {
+      "type": "text"
+    },
+    "icon": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "badge_color": {
+      "type": "enumeration",
+      "enum": ["primary", "secondary"],
+      "default": "primary"
+    }
+  }
+}
