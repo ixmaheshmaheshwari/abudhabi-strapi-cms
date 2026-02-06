@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/strapi';
+import seedAbuDhabiWaterWeek from './seed/abu-dhabi-water-week';
 
 export default {
   /**
@@ -19,7 +20,6 @@ export default {
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
     // Seed Abu Dhabi Water Week content
     try {
-      const seedAbuDhabiWaterWeek = require('./seed/abu-dhabi-water-week');
       await seedAbuDhabiWaterWeek({ strapi });
     } catch (error) {
       console.error('Error seeding Abu Dhabi Water Week data:', error);
