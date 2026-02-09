@@ -1,6 +1,40 @@
 import type { Core } from '@strapi/strapi';
+import fs from 'fs';
+import path from 'path';
 
-// Seed data - text content only (images will be uploaded manually)
+// Base path for frontend images
+const FRONTEND_IMAGE_BASE_PATH = '/Users/mahesh/Documents/AbuDhabi-Water-Power-Week/src/assets/media';
+
+// Image path mappings
+const IMAGE_PATHS = {
+  // Main page images
+  hero_image: path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabiWaterWeekHero.png'),
+  explore_image: path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabiWaterWeekSide.png'),
+  why_exhibitor_image: path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabhiAndWaterWeek/ExhibitorAbuDhabhiWater Week.png'),
+  
+  // Top Reasons images
+  topReasons: [
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabhiAndWaterWeek/GlobalLeaders.png'),
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabhiAndWaterWeek/InnovationTechnolgy.png'),
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabhiAndWaterWeek/stragicConnection.png'),
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabhiAndWaterWeek/HighValueKnowledge.png'),
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabhiAndWaterWeek/AbuDhabiWater.png'),
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabhiAndWaterWeek/ProfessionalGrowth.png')
+  ],
+  
+  // Exhibitor Reasons icons
+  exhibitorReasons: [
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabiExhibticor/Leaders.png'),
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabiExhibticor/Highlight.png'),
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabiExhibticor/Parternship.png'),
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabiExhibticor/Market.png'),
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabiExhibticor/Platforn.png'),
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabiExhibticor/GlobalExperts.png'),
+    path.join(FRONTEND_IMAGE_BASE_PATH, 'AbuDhabiExhibticor/RegionalMarket.png')
+  ]
+};
+
+// Seed data with new JSON content
 const seedData = {
   abuDhabiWaterWeekPage: {
     hero_title_en: "About Abu Dhabi",
@@ -140,75 +174,157 @@ const seedData = {
   ]
 };
 
+/**
+ * Helper function to upload an image to Strapi media library
+ * Using manual file copy and database entry creation
+ */
+async function uploadImage(
+  strapi: Core.Strapi,
+  imagePath: string,
+  imageName: string
+): Promise<number | string | null> {
+  try {
+    // Check if file exists
+    if (!fs.existsSync(imagePath)) {
+      console.warn(`  ⚠️  Image not found: ${imagePath}`);
+      return null;
+    }
+
+    const fileName = path.basename(imagePath);
+    const stats = fs.statSync(imagePath);
+    const ext = path.extname(fileName).slice(1);
+    const hash = Date.now() + '_' + Math.random().toString(36).substring(7);
+    const newFileName = `${hash}.${ext}`;
+
+    // Create uploads directory if it doesn't exist
+    const uploadsDir = path.join(strapi.dirs.static.public, 'uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    // Copy file to uploads directory
+    const destPath = path.join(uploadsDir, newFileName);
+    fs.copyFileSync(imagePath, destPath);
+
+    // Create file entry in database
+    const fileEntry = await strapi.entityService.create('plugin::upload.file', {
+      data: {
+        name: fileName,
+        alternativeText: imageName,
+        caption: imageName,
+        hash: hash,
+        ext: `.${ext}`,
+        mime: `image/${ext}`,
+        size: (stats.size / 1024).toFixed(2),
+        url: `/uploads/${newFileName}`,
+        provider: 'local',
+        folder: null,
+        folderPath: '/'
+      }
+    });
+
+    console.log(`  ✓ Uploaded image: ${fileName}`);
+    return fileEntry.id;
+  } catch (error) {
+    console.error(`  ❌ Error uploading image ${imageName}:`, error.message);
+    return null;
+  }
+}
+
 export default async function seedAbuDhabiWaterWeek({ strapi }: { strapi: Core.Strapi }) {
-  console.log('\n🌱 Starting Abu Dhabi Water Week seed...\n');
+  console.log('\n🌱 Starting Abu Dhabi Water Week seed with image uploads...\n');
 
   try {
     // Seed Top Reasons
     const existingTopReasons = await strapi.entityService.findMany('api::top-reason.top-reason');
     
     if (!existingTopReasons || existingTopReasons.length === 0) {
-      console.log('📝 Seeding Top Reasons...');
+      console.log('📝 Seeding Top Reasons with images...');
       
-      for (const reason of seedData.topReasons) {
+      for (let i = 0; i < seedData.topReasons.length; i++) {
+        const reason = seedData.topReasons[i];
+        const imagePath = IMAGE_PATHS.topReasons[i];
+        
+        // Upload image
+        const imageId = await uploadImage(strapi, imagePath, `Top Reason ${reason.order} - ${reason.title_en}`);
+        
+        // Create entry with image
         await strapi.entityService.create('api::top-reason.top-reason', {
           data: {
             ...reason,
+            image: imageId,
             publishedAt: new Date()
           }
         });
-        console.log(`  ✓ Created Top Reason ${reason.order}: ${reason.title_en.slice(0, 30)}...`);
+        console.log(`  ✓ Created Top Reason ${reason.order}: ${reason.title_en.slice(0, 40)}...`);
       }
-      console.log('✅ Top Reasons seeded! Upload images manually in Media Library.\n');
+      console.log('✅ Top Reasons seeded with images!\n');
     } else {
-      console.log('⏭️ Top Reasons already exist, skipping...\n');
+      console.log('⏭️  Top Reasons already exist, skipping...\n');
     }
 
     // Seed Exhibitor Reasons
     const existingExhibitorReasons = await strapi.entityService.findMany('api::exhibitor-reason.exhibitor-reason');
     
     if (!existingExhibitorReasons || existingExhibitorReasons.length === 0) {
-      console.log('📝 Seeding Exhibitor Reasons...');
+      console.log('📝 Seeding Exhibitor Reasons with icons...');
       
-      for (const reason of seedData.exhibitorReasons) {
+      for (let i = 0; i < seedData.exhibitorReasons.length; i++) {
+        const reason = seedData.exhibitorReasons[i];
+        const iconPath = IMAGE_PATHS.exhibitorReasons[i];
+        
+        // Upload icon
+        const iconId = await uploadImage(strapi, iconPath, `Exhibitor Reason ${reason.order} - ${reason.title_en}`);
+        
+        // Create entry with icon
         await strapi.entityService.create('api::exhibitor-reason.exhibitor-reason', {
           data: {
             ...reason,
+            icon: iconId,
             publishedAt: new Date()
           }
         });
-        console.log(`  ✓ Created Exhibitor Reason ${reason.order}: ${reason.title_en.slice(0, 30)}...`);
+        console.log(`  ✓ Created Exhibitor Reason ${reason.order}: ${reason.title_en.slice(0, 40)}...`);
       }
-      console.log('✅ Exhibitor Reasons seeded! Upload icons manually in Media Library.\n');
+      console.log('✅ Exhibitor Reasons seeded with icons!\n');
     } else {
-      console.log('⏭️ Exhibitor Reasons already exist, skipping...\n');
+      console.log('⏭️  Exhibitor Reasons already exist, skipping...\n');
     }
 
     // Seed Abu Dhabi Water Week Page (Single Type)
-    // For single types, findMany returns an object or null, not an array
     const existingPage = await strapi.entityService.findMany('api::abu-dhabi-water-week.abu-dhabi-water-week') as { id?: string | number } | null;
     
     const pageExists = existingPage && typeof existingPage === 'object' && 'id' in existingPage;
     
     if (!pageExists) {
-      console.log('📝 Seeding Abu Dhabi Water Week Page...');
+      console.log('📝 Seeding Abu Dhabi Water Week Page with images...');
       
+      // Upload main page images
+      const heroImageId = await uploadImage(strapi, IMAGE_PATHS.hero_image, 'Abu Dhabi Water Week Hero');
+      const exploreImageId = await uploadImage(strapi, IMAGE_PATHS.explore_image, 'Abu Dhabi Water Week Explore');
+      const exhibitorImageId = await uploadImage(strapi, IMAGE_PATHS.why_exhibitor_image, 'Why Be an Exhibitor');
+      
+      // Create page with images
       await strapi.entityService.create('api::abu-dhabi-water-week.abu-dhabi-water-week', {
         data: {
           ...seedData.abuDhabiWaterWeekPage,
+          hero_image: heroImageId,
+          explore_image: exploreImageId,
+          why_exhibitor_image: exhibitorImageId,
           publishedAt: new Date()
         }
       });
-      console.log('✅ Abu Dhabi Water Week Page seeded! Upload images manually in Media Library.\n');
+      console.log('✅ Abu Dhabi Water Week Page seeded with images!\n');
     } else {
-      console.log('⏭️ Abu Dhabi Water Week Page already exists, skipping...\n');
+      console.log('⏭️  Abu Dhabi Water Week Page already exists, skipping...\n');
     }
 
-    console.log('🎉 Seed completed! Remember to:');
-    console.log('   1. Upload images to Media Library');
-    console.log('   2. Link images to entries in Content Manager');
-    console.log('   3. Configure public permissions in Settings → Roles → Public\n');
+    console.log('🎉 Seed completed successfully!');
+    console.log('   ✓ All images uploaded to Media Library');
+    console.log('   ✓ All entries created with image associations');
+    console.log('   ⚠️  Remember to configure public permissions in Settings → Roles → Public\n');
   } catch (error) {
     console.error('❌ Error during seeding:', error);
+    throw error;
   }
 }
