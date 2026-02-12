@@ -1,5 +1,32 @@
 "use strict";
 
-const { createCoreRouter } = require("@strapi/strapi").factories;
+/**
+ * exhibitor-reason router
+ * 
+ * Custom routes with explicit public access configuration
+ */
 
-module.exports = createCoreRouter("api::exhibitor-reason.exhibitor-reason");
+module.exports = {
+  routes: [
+    {
+      method: "GET",
+      path: "/exhibitor-reasons",
+      handler: "exhibitor-reason.find",
+      config: {
+        auth: false, // Allow public access
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: "GET",
+      path: "/exhibitor-reasons/:id",
+      handler: "exhibitor-reason.findOne",
+      config: {
+        auth: false, // Allow public access
+        policies: [],
+        middlewares: [],
+      },
+    },
+  ],
+};

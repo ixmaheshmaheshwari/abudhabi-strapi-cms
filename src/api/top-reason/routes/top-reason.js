@@ -1,5 +1,32 @@
 "use strict";
 
-const { createCoreRouter } = require("@strapi/strapi").factories;
+/**
+ * top-reason router
+ * 
+ * Custom routes with explicit public access configuration
+ */
 
-module.exports = createCoreRouter("api::top-reason.top-reason");
+module.exports = {
+  routes: [
+    {
+      method: "GET",
+      path: "/top-reasons",
+      handler: "top-reason.find",
+      config: {
+        auth: false, // Allow public access
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: "GET",
+      path: "/top-reasons/:id",
+      handler: "top-reason.findOne",
+      config: {
+        auth: false, // Allow public access
+        policies: [],
+        middlewares: [],
+      },
+    },
+  ],
+};
