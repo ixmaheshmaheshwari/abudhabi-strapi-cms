@@ -2,22 +2,21 @@
 
 /**
  * abu-dhabi-water-week router
- * 
- * Custom routes with explicit public access configuration
- * This allows the API to be accessed without authentication
  */
 
-module.exports = {
-  routes: [
-    {
-      method: "GET",
-      path: "/abu-dhabi-water-week",
-      handler: "abu-dhabi-water-week.find",
-      config: {
-        auth: false, // Disable authentication requirement
-        policies: [],
-        middlewares: [],
-      },
+const { createCoreRouter } = require("@strapi/strapi").factories;
+
+module.exports = createCoreRouter("api::abu-dhabi-water-week.abu-dhabi-water-week", {
+  config: {
+    find: {
+      auth: false, // Allow public access
+      policies: [],
+      middlewares: [],
     },
-  ],
-};
+    findOne: {
+      auth: false, // Allow public access
+      policies: [],
+      middlewares: [],
+    },
+  },
+});
