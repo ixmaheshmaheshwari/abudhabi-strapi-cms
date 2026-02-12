@@ -2,8 +2,8 @@ import type { Core } from '@strapi/strapi';
 import seedAbuDhabiWaterWeek from './seed/abu-dhabi-water-week';
 
 /**
- * Enable public access for custom content types
- * This bypasses the need to manually configure permissions in Strapi Admin UI
+ * Create and enable public access for custom content types
+ * This creates the permission entries that are missing from Strapi Cloud UI
  */
 async function setPublicPermissions({ strapi }: { strapi: Core.Strapi }) {
   const publicRole = await strapi
@@ -16,36 +16,51 @@ async function setPublicPermissions({ strapi }: { strapi: Core.Strapi }) {
   }
 
   // Content types to make public
-  const contentTypes = [
-    'api::top-reason.top-reason',
-    'api::exhibitor-reason.exhibitor-reason',
-    'api::abu-dhabi-water-week.abu-dhabi-water-week',
+  const contentTypesConfig = [
+    { uid: 'api::top-reason.top-reason', actions: ['find', 'findOne'] },
+    { uid: 'api::exhibitor-reason.exhibitor-reason', actions: ['find', 'findOne'] },
+    { uid: 'api::abu-dhabi-water-week.abu-dhabi-water-week', actions: ['find', 'findOne'] },
   ];
 
-  console.log('🔓 Setting public permissions for custom content types...');
+  console.log('🔓 Creating/enabling public permissions for custom content types...');
 
-  for (const contentType of contentTypes) {
-    // Enable find and findOne permissions
-    const permissions = await strapi
-      .query('plugin::users-permissions.permission')
-      .findMany({
-        where: {
-          role: publicRole.id,
-          action: {
-            $in: [`${contentType}.find`, `${contentType}.findOne`],
+  for (const contentType of contentTypesConfig) {
+    for (const action of contentType.actions) {
+      const actionName = `${contentType.uid}.${action}`;
+      
+      // Check if permission already exists
+      let permission = await strapi
+        .query('plugin::users-permissions.permission')
+        .findOne({
+          where: {
+            role: publicRole.id,
+            action: actionName,
           },
-        },
-      });
+        });
 
-    // Update permissions to enabled
-    for (const permission of permissions) {
-      await strapi.query('plugin::users-permissions.permission').update({
-        where: { id: permission.id },
-        data: { enabled: true },
-      });
+      if (permission) {
+        // Permission exists, just enable it
+        if (!permission.enabled) {
+          await strapi.query('plugin::users-permissions.permission').update({
+            where: { id: permission.id },
+            data: { enabled: true },
+          });
+          console.log(`   ✓ Enabled ${actionName}`);
+        } else {
+          console.log(`   ℹ️  ${actionName} already enabled`);
+        }
+      } else {
+        // Permission doesn't exist, create it
+        await strapi.query('plugin::users-permissions.permission').create({
+          data: {
+            action: actionName,
+            role: publicRole.id,
+            enabled: true,
+          },
+        });
+        console.log(`   ✨ Created and enabled ${actionName}`);
+      }
     }
-
-    console.log(`   ✓ Enabled public access for ${contentType}`);
   }
 
   console.log('✅ Public permissions configured successfully!');
